@@ -10,24 +10,7 @@ export default function PostList(){
   const {postList,addInitialPost} = useContext(PostListData);
   const [featching,setFeatching] = useState(false);
 
-  useEffect(()=>{
-    setFeatching(true);
-
-    const controler = new AbortController();
-    const signal = controler.signal;
-    
-    fetch('https://dummyjson.com/posts')
-     .then((res) => res.json())
-     .then((data)=>{
-      addInitialPost(data.posts);
-      setFeatching(false);
-     });
-
-     return()=>{
-      // console.log("cleaning up use effect");
-      controler.abort();
-     }
-  },[]);
+  
   return (
     <>
     {

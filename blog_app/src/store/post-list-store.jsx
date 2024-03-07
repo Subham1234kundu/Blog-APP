@@ -1,9 +1,9 @@
-import { createContext, useReducer } from "react";
+import { createContext, useReducer,useState,useEffect } from "react";
 
 export const PostList = createContext ({
     postList: [],
     addPost: ()=>{},
-    addInitialPost: ()=>{},
+    featching: false,
     deletePost: ()=>{},
 });
 
@@ -25,24 +25,16 @@ const postListReducer = (currPostList,action) =>{
 
 const PostListProvider = ({children})=>{
     
-    const [postList,dispachPostList] = useReducer(postListReducer,[]);
-   
-
-   
+    const [postList,dispachPostList] = useReducer(postListReducer,[]);   
+    const [featching,setFeatching] = useState(false);
 
     
-   const addPost = (userId,postTitle,postBody,tags,reactions) =>{
+   const addPost = (post) =>{
    
     dispachPostList({
         type:"ADD_POST",
-        payload:{
-            id:Date.now(),
-            title:postTitle,
-            body:postBody,
-            reactions:reactions,
-            userId:userId,
-            tags:tags
-        }
+        payload:post
+        
     })
    };
 
@@ -64,7 +56,27 @@ const PostListProvider = ({children})=>{
     })
    };
 
-   return <PostList.Provider value={{postList,addInitialPost,addPost,deletePost}}>
+
+   useEffect(()=>{
+    setFeatching(true);
+
+    const controler = new AbortController();
+    const signal = controler.signal;
+    
+    fetch('https://dummyjson.com/posts' ,{signal})
+     .then((res) => res.json())
+     .then((data)=>{
+      addInitialPost(data.posts);
+      setFeatching(false);
+     });
+
+     return()=>{
+      // console.log("cleaning up use effect");
+      controler.abort();
+     }
+  },[]);
+
+   return <PostList.Provider value={{postList,featching,addPost,deletePost}}>
         {children}
     </PostList.Provider>
 }
